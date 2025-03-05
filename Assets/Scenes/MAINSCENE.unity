@@ -145,13 +145,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1103061405}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0.0039967285, z: -0, w: 0.999992}
+  m_LocalPosition: {x: -0.000010222197, y: 0, z: 0.0025578944}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1488669385}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: -0.458, z: 0}
 --- !u!483693784 &1103061407
 TilemapRenderer:
   m_ObjectHideFlags: 0
@@ -4850,7 +4850,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 45136060a04b2e44abaa7ed2ba89d24d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 0.01
+  LeftAction:
+    m_Name: Left
+    m_Type: 1
+    m_ExpectedControlType: Button
+    m_Id: 95038358-bc0c-4cbf-95e9-031e418dc685
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings:
+    - m_Name: 
+      m_Id: b8f68a70-a4c7-4d6a-9084-4f5bf25f0617
+      m_Path: <Keyboard>/leftArrow
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Left
+      m_Flags: 0
+    m_Flags: 0
 --- !u!1 &1488669383
 GameObject:
   m_ObjectHideFlags: 0
