@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+
 public class PlayerController : MonoBehaviour
 {
     // Variables related to player character movement
@@ -13,83 +14,124 @@ public class PlayerController : MonoBehaviour
 
     // Variables related to the health system
     public int maxHealth = 5;
+    public int health { get { return currentHealth; } }
     int currentHealth;
-    public int health { get { return currentHealth; }}
 
     // Variables related to temporary invincibility
     public float timeInvincible = 2.0f;
     bool isInvincible;
     float damageCooldown;
 
+    // Variables related to Animation
+    Animator animator;
+    Vector2 moveDirection = new Vector2(1, 0);
+
+    // // Variables related to Projectile
+    public GameObject projectilePrefab;
+
+
     // Start is called before the first frame update
     void Start()
     {
         MoveAction.Enable();
         rigidbody2d = GetComponent<Rigidbody2D>();
-        if (rigidbody2d == null)
-        {
-            Debug.LogError("Rigidbody2D component missing on " + gameObject.name);
-        }
-
         currentHealth = maxHealth;
+        animator = GetComponent<Animator>();
     }
+
 
     // Update is called once per frame
     void Update()
     {
         move = MoveAction.ReadValue<Vector2>();
+        //Debug.Log(move);
+
+
+        if (!Mathf.Approximately(move.x, 0.0f) || !Mathf.Approximately(move.y, 0.0f))
+        {
+            moveDirection.Set(move.x, move.y);
+            moveDirection.Normalize();
+        }
+
+        animator.SetFloat("Look X", moveDirection.x);
+        animator.SetFloat("Look Y", moveDirection.y);
+        animator.SetFloat("Speed", move.magnitude);
+
 
         if (isInvincible)
         {
             damageCooldown -= Time.deltaTime;
             if (damageCooldown < 0)
+            {
                 isInvincible = false;
+            }
+        }
+
+
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            Launch();
+        }
+
+
+        if (Input.GetKeyDown(KeyCode.X))
+        {
+           FindFriend();
         }
     }
 
-    // FixedUpdate has the same call rate as the physics system
+
+
+
+    // FixedUpdate has the same call rate as the physics system 
     void FixedUpdate()
     {
-        if (rigidbody2d != null)
-        {
-            Vector2 position = (Vector2)rigidbody2d.position + move * speed * Time.deltaTime;
-            rigidbody2d.MovePosition(position);
-        }
+        Vector2 position = (Vector2)rigidbody2d.position + move * speed * Time.deltaTime;
+        rigidbody2d.MovePosition(position);
     }
 
-    // Method to change the player's health
+
+
     public void ChangeHealth(int amount)
     {
         if (amount < 0)
         {
             if (isInvincible)
+            {
                 return;
-
+            }
             isInvincible = true;
             damageCooldown = timeInvincible;
+            animator.SetTrigger("Hit");
         }
-
         currentHealth = Mathf.Clamp(currentHealth + amount, 0, maxHealth);
-        Debug.Log("Health changed by " + amount + ". Current health: " + currentHealth);
-
-        if (UIhandle.instance != null)
-        {
-            UIhandle.instance.SetHealthValue(currentHealth / (float)maxHealth);
-        }
-        else
-        {
-            Debug.LogError("UIhandle instance is null. Ensure UIhandle is set up in the scene.");
-        }
+        UIhandle.instance.SetHealthValue(currentHealth / (float)maxHealth);
     }
 
-    // Disable the MoveAction when the object is destroyed or disabled
-    void OnDestroy()
+
+    void Launch()
     {
-        MoveAction.Disable();
+        GameObject projectileObject = Instantiate(projectilePrefab, rigidbody2d.position + Vector2.up * 0.5f, Quaternion.identity);
+        Projectile projectile = projectileObject.GetComponent<Projectile>();
+        projectile.Launch(moveDirection, 300);
+        animator.SetTrigger("Launch");
     }
 
-    void OnDisable()
+
+    void FindFriend()
     {
-        MoveAction.Disable();
+        RaycastHit2D hit = Physics2D.Raycast(rigidbody2d.position + Vector2.up * 0.2f, moveDirection, 1.5f, LayerMask.GetMask("NPC"));
+        if (hit.collider != null)
+        {
+            NonPlayerCharacter character = hit.collider.GetComponent<NonPlayerCharacter>();
+            if (character != null)
+            {
+                UIhandle.instance.DisplayDialogue();
+            }
+        }
     }
+    
+    
 }
+
+
